@@ -1,0 +1,25 @@
+# Dependencies and caches
+node_modules
+.pnpm-store
+
+# Build artifacts
+.next
+.turbo
+dist
+out
+coverage
+
+# VCS and OS
+.git
+.gitignore
+.DS_Store
+
+# Env files
+.env
+.env.*
+!.env.example
+
+# Test outputs
+playwright-report
+blob-report
+trace.zip
