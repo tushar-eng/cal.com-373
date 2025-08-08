@@ -8,6 +8,9 @@ FROM node:${NODE_VERSION}-slim as base
 
 WORKDIR /app
 ENV NODE_ENV=production
+# Apply memory/telemetry defaults repo-wide inside this image (build and runtime)
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+ENV NEXT_TELEMETRY_DISABLED=1
 
 # ----- Build stage -----
 FROM base as build

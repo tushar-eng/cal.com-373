@@ -75,6 +75,10 @@
     "docker-build-api": "docker build -t cal-api -f ./infra/docker/api/Dockerfile .",
     "docker-run-api": "docker run -p 80:80 cal-api",
     "docker-stop-api": "docker ps --filter 'ancestor=cal-api' -q | xargs docker stop"
+    ,
+    "docker-build-web": "docker build -t cal-web -f ./infra/docker/web/Dockerfile .",
+    "docker-run-web": "docker run -p 80:80 cal-web",
+    "docker-stop-web": "docker ps --filter 'ancestor=cal-web' -q | xargs docker stop"
   },
   "devDependencies": {
     "@changesets/cli": "^2.26.1",

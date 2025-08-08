@@ -9,6 +9,9 @@ WORKDIR /app
 
 # Set production environment
 ENV NODE_ENV="production"
+# Apply memory/telemetry defaults across the image (build and runtime)
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+ENV NEXT_TELEMETRY_DISABLED=1
 
 
 # Throw-away build stage to reduce size of final image

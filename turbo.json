@@ -195,6 +195,8 @@
   },
   "globalDependencies": ["yarn.lock"],
   "globalEnv": [
+    "NODE_OPTIONS",
+    "NEXT_TELEMETRY_DISABLED",
     "AB_TEST_BUCKET_PROBABILITY",
     "ALLOWED_HOSTNAMES",
     "ANALYZE",
