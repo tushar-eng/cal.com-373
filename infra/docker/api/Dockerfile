@@ -22,6 +22,10 @@ COPY ./packages ./packages
 # TODO: follow up pr to remove dependencies on web
 COPY ./apps/web ./apps/web
 
+# Give Next.js build more memory and silence telemetry in CI
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+ENV NEXT_TELEMETRY_DISABLED=1
+
 # Install node modules and dependencies, prune unneeded deps, then build
 RUN set -eux; \
     apt-get update -qq && \

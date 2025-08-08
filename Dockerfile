@@ -20,6 +20,10 @@ COPY ./packages ./packages
 # Include web temporarily for shared config/locales used by API responses
 COPY ./apps/web ./apps/web
 
+# Increase Node.js memory for Next.js build and disable Next telemetry during build
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+ENV NEXT_TELEMETRY_DISABLED=1
+
 RUN set -eux; \
     apt-get update -qq && \
     apt-get install -y --no-install-recommends build-essential openssl pkg-config python-is-python3 && \
