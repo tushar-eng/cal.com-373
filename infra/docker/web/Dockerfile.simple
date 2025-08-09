@@ -25,21 +25,22 @@ RUN apt-get update -qq && \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
-# Copy package files first for better Docker layer caching
-COPY package.json yarn.lock .yarnrc.yml ./
+# Copy repo manifests and workspaces before install (Yarn workspaces need them present)
+COPY package.json yarn.lock .yarnrc.yml turbo.json ./
 COPY /.yarn ./.yarn
-
-# Enable Corepack (Yarn 3) and install root dependencies
-RUN corepack enable
-ENV YARN_ENABLE_GLOBAL_CACHE=1
-ENV YARN_NM_MODE=hardlinks-local
-RUN yarn config set httpTimeout 1200000 && \
-    yarn install --immutable
-
-# Copy source code
-COPY turbo.json ./
 COPY apps/web ./apps/web
 COPY packages ./packages
+
+# Enable Corepack (Yarn 3) and install dependencies
+RUN corepack enable && corepack prepare yarn@3.4.1 --activate
+ENV YARN_ENABLE_GLOBAL_CACHE=1
+ENV YARN_NM_MODE=hardlinks-local
+RUN yarn --version && yarn config set httpTimeout 1200000 && \
+    yarn config set enableInlineBuilds true && \
+    npx turbo prune --scope=@calcom/web --docker && \
+    yarn install --immutable --inline-builds
+
+# (already copied sources above)
 
 # Set minimal environment variables needed for build
 ENV NEXTAUTH_SECRET="build-time-secret-will-be-overridden-at-runtime-32chars"
