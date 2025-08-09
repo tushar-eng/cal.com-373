@@ -35,10 +35,9 @@ COPY packages ./packages
 RUN corepack enable && corepack prepare yarn@3.4.1 --activate
 ENV YARN_ENABLE_GLOBAL_CACHE=1
 ENV YARN_NM_MODE=hardlinks-local
-RUN yarn --version && yarn config set httpTimeout 1200000 && \
-    yarn config set enableInlineBuilds true && \
-    npx turbo prune --scope=@calcom/web --docker && \
-    yarn install --immutable --inline-builds
+RUN yarn --version && \
+    yarn config set httpTimeout 1200000 && \
+    yarn install --immutable
 
 # (already copied sources above)
 
