@@ -35,11 +35,10 @@ COPY packages ./packages
 RUN corepack enable && corepack prepare yarn@3.4.1 --activate
 ENV YARN_ENABLE_GLOBAL_CACHE=1
 ENV YARN_NM_MODE=hardlinks-local
-RUN yarn --version && \
-    yarn config set httpTimeout 1200000 && \
-    yarn config set networkConcurrency 1 && \
-    yarn config set enableGlobalCache true && \
-    yarn install --immutable --verbose
+RUN yarn config set nodeLinker node-modules && \
+    yarn config set enableGlobalCache false && \
+    yarn config set nmMode hardlinks-local && \
+    yarn install --inline-builds
 
 # (already copied sources above)
 
