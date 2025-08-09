@@ -22,7 +22,7 @@ ENV YARN_CACHE_FOLDER=.yarn/cache PRISMA_SKIP_POSTINSTALL_GENERATE=1
 RUN yarn config set nodeLinker node-modules && \
     yarn config set enableGlobalCache false && \
     yarn config set nmMode hardlinks-local && \
-    yarn install --inline-builds --verbose
+    yarn install --inline-builds
 
 # now generate prisma + build
 RUN yarn workspaces foreach -A -t exec -- prisma generate || true
