@@ -37,15 +37,20 @@ ENV NEXT_PUBLIC_WEBAPP_URL=${NEXT_PUBLIC_WEBAPP_URL}
 ENV EMAIL_FROM=${EMAIL_FROM}
 ENV DATABASE_URL=${DATABASE_URL}
 
+# Enable Yarn Berry via Corepack (Node >=16 ships Corepack, but it's disabled by default)
+RUN corepack enable
+
 RUN set -eux; \
     apt-get update -qq && \
-    apt-get install -y --no-install-recommends build-essential openssl pkg-config python-is-python3 git && \
+    apt-get install -y --no-install-recommends build-essential openssl pkg-config python-is-python3 git ca-certificates && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
-# Install dependencies
+# Install dependencies (Yarn Berry)
+ENV YARN_ENABLE_GLOBAL_CACHE=1
+ENV YARN_NM_MODE=hardlinks-local
 RUN yarn config set httpTimeout 1200000 && \
-    yarn install --frozen-lockfile
+    yarn install --immutable
 
 # Build the web application with verbose logging
 RUN set -ex; \
