@@ -1,0 +1,105 @@
+# syntax = docker/dockerfile:1
+
+# Simple Cal.com Web App Dockerfile for EasyPanel
+
+ARG NODE_VERSION=20.7.0
+FROM node:${NODE_VERSION}-slim as base
+
+WORKDIR /app
+ENV NODE_ENV=production
+ENV NODE_OPTIONS="--max-old-space-size=6144"
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# ----- Build stage -----
+FROM base as build
+
+# Install build dependencies
+RUN apt-get update -qq && \
+    apt-get install -y --no-install-recommends \
+    build-essential \
+    openssl \
+    pkg-config \
+    python-is-python3 \
+    git \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists /var/cache/apt/archives
+
+# Copy package files first for better Docker layer caching
+COPY package.json yarn.lock .yarnrc.yml ./
+COPY /.yarn ./.yarn
+
+# Install root dependencies
+RUN yarn config set httpTimeout 1200000 && \
+    yarn install --frozen-lockfile
+
+# Copy source code
+COPY turbo.json ./
+COPY apps/web ./apps/web
+COPY packages ./packages
+
+# Set minimal environment variables needed for build
+ENV NEXTAUTH_SECRET="build-time-secret-will-be-overridden-at-runtime-32chars"
+ENV CALENDSO_ENCRYPTION_KEY="0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+ENV NEXTAUTH_URL="http://localhost:3000/api/auth"
+ENV NEXT_PUBLIC_WEBAPP_URL="http://localhost:3000"
+ENV EMAIL_FROM="Cal.com <build@localhost>"
+ENV DATABASE_URL="postgresql://build:build@localhost:5432/build"
+
+# Build the application
+RUN yarn turbo run build --filter=@calcom/web
+
+# ----- Runtime stage -----
+FROM base as runtime
+
+# Install runtime dependencies
+RUN apt-get update -qq && \
+    apt-get install -y --no-install-recommends openssl curl && \
+    rm -rf /var/lib/apt/lists /var/cache/apt/archives
+
+# Copy built application
+COPY --from=build /app/package.json ./package.json
+COPY --from=build /app/yarn.lock ./yarn.lock
+COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/turbo.json ./turbo.json
+
+# Copy web app
+COPY --from=build /app/apps/web/package.json ./apps/web/package.json
+COPY --from=build /app/apps/web/next.config.js ./apps/web/next.config.js
+COPY --from=build /app/apps/web/next-i18next.config.js ./apps/web/next-i18next.config.js
+COPY --from=build /app/apps/web/.next ./apps/web/.next
+COPY --from=build /app/apps/web/public ./apps/web/public
+
+# Copy shared packages
+COPY --from=build /app/packages ./packages
+
+# Create startup script
+RUN cat << 'EOF' > /app/start.sh
+#!/bin/bash
+set -e
+
+echo "🚀 Starting Cal.com..."
+
+# Run database migrations
+echo "📊 Running database migrations..."
+yarn db-deploy
+
+# Seed app store
+echo "🏪 Seeding app store..."
+cd packages/prisma && yarn seed-app-store && cd ../..
+
+# Start the web application
+echo "🌐 Starting web server on port ${PORT:-3000}..."
+exec yarn workspace @calcom/web start
+EOF
+
+RUN chmod +x /app/start.sh
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=30s --start-period=60s --retries=3 \
+  CMD curl -f http://localhost:${PORT:-3000}/api/health || exit 1
+
+# Expose port
+EXPOSE 3000
+
+# Start the application
+CMD ["/app/start.sh"]
