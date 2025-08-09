@@ -2,7 +2,7 @@
 
 # Simple Cal.com Web App Dockerfile for EasyPanel
 
-ARG NODE_VERSION=20.7.0
+ARG NODE_VERSION=18.20.3
 FROM node:${NODE_VERSION}-slim as base
 
 WORKDIR /app
@@ -37,7 +37,9 @@ ENV YARN_ENABLE_GLOBAL_CACHE=1
 ENV YARN_NM_MODE=hardlinks-local
 RUN yarn --version && \
     yarn config set httpTimeout 1200000 && \
-    yarn install --immutable
+    yarn config set networkConcurrency 1 && \
+    yarn config set enableGlobalCache true && \
+    yarn install --immutable --verbose
 
 # (already copied sources above)
 
