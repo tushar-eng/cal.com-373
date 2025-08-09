@@ -26,7 +26,7 @@ RUN yarn config set nodeLinker node-modules && \
 
 # now generate prisma + build
 RUN yarn workspaces foreach -A -t exec -- prisma generate || true
-RUN yarn turbo run build --filter=@calcom/web --verbose
+RUN yarn turbo run build --filter=@calcom/web
 
 FROM node:${NODE_VERSION}-slim as runner
 WORKDIR /app
