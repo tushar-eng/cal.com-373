@@ -1,0 +1,70 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:13
+    container_name: calcom_postgres
+    restart: unless-stopped
+    ports:
+      - "5450:5432"
+    environment:
+      POSTGRES_DB: calcom
+      POSTGRES_USER: calcom
+      POSTGRES_PASSWORD: calcom
+    volumes:
+      - calcom_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U calcom"]
+      interval: 10s
+      timeout: 5s
+      retries: 8
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: calcom_mailhog
+    restart: unless-stopped
+    ports:
+      - "8025:8025" # Web UI
+      - "1025:1025" # SMTP
+
+  api:
+    build:
+      context: ../..
+      dockerfile: infra/docker/api/Dockerfile
+    container_name: calcom_api
+    env_file:
+      - ./.env.docker
+    environment:
+      # API listens on 80 in its image; map externally below
+      PORT: "80"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "3002:80"
+
+  web:
+    build:
+      context: ../..
+      dockerfile: infra/docker/web/Dockerfile.simple
+    container_name: calcom_web
+    env_file:
+      - ./.env.docker
+    environment:
+      PORT: "3000"
+      NEXT_PUBLIC_WEBAPP_URL: "http://localhost:3000"
+      NEXTAUTH_URL: "http://localhost:3000/api/auth"
+      DATABASE_URL: "postgresql://calcom:calcom@postgres:5432/calcom?schema=public"
+      EMAIL_SERVER_HOST: "mailhog"
+      EMAIL_SERVER_PORT: "1025"
+      E2E_TEST_MAILHOG_ENABLED: "1"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+
+volumes:
+  calcom_db_data:
+
+

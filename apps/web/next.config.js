@@ -230,6 +230,11 @@ const nextConfig = {
 
     config.plugins.push(new webpack.DefinePlugin({ "process.env.BUILD_ID": JSON.stringify(buildId) }));
 
+    // Allow disabling webpack filesystem cache in constrained CI/Docker builds
+    if (process.env.DISABLE_WEBPACK_CACHE === "1") {
+      config.cache = false;
+    }
+
     config.resolve.fallback = {
       ...config.resolve.fallback, // if you miss it, all the other options in fallback, specified
       // by next.js will be dropped. Doesn't make much sense, but how it is
