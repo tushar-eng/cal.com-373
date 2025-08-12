@@ -5,8 +5,7 @@ services:
     image: postgres:13
     container_name: calcom_postgres
     restart: unless-stopped
-    ports:
-      - "5450:5432"
+    ports: ["5450:5432"]
     environment:
       POSTGRES_DB: calcom
       POSTGRES_USER: calcom
@@ -23,9 +22,7 @@ services:
     image: mailhog/mailhog:latest
     container_name: calcom_mailhog
     restart: unless-stopped
-    ports:
-      - "8025:8025" # Web UI
-      - "1025:1025" # SMTP
+    ports: ["8025:8025", "1025:1025"]
 
   api:
     build:
@@ -35,25 +32,34 @@ services:
     env_file:
       - ./.env.docker
     environment:
-      # API listens on 80 in its image; map externally below
+      HOST: "0.0.0.0"
       PORT: "80"
+      # make sure API hits the right DB (don't rely on .env.docker defaults)
+      DATABASE_URL: "postgresql://calcom:calcom@postgres:5432/calcom?schema=public"
+      EMAIL_SERVER_HOST: "mailhog"
+      EMAIL_SERVER_PORT: "1025"
     depends_on:
       postgres:
         condition: service_healthy
-    ports:
-      - "3002:80"
+    ports: ["3002:80"]
 
   web:
     build:
       context: ../..
       dockerfile: infra/docker/web/Dockerfile.simple
+      # >>> THESE ARGS ARE USED DURING yarn build <<<
+      args:
+        NEXT_PUBLIC_WEBAPP_URL: "https://evalify-cal.y34zyo.easypanel.host"
+        NEXT_PUBLIC_WEBSITE_URL: "https://evalify-cal.y34zyo.easypanel.host"
+        NEXT_PUBLIC_EMBED_LIB_URL: "https://evalify-cal.y34zyo.easypanel.host/embed/embed.js"
+        NEXTAUTH_URL: "https://evalify-cal.y34zyo.easypanel.host"
     container_name: calcom_web
     env_file:
       - ./.env.docker
     environment:
+      HOST: "0.0.0.0"
       PORT: "3001"
-      NEXT_PUBLIC_WEBAPP_URL: "http://localhost:3001"
-      NEXTAUTH_URL: "http://localhost:3001/api/auth"
+      # keep DB/email explicit at runtime too
       DATABASE_URL: "postgresql://calcom:calcom@postgres:5432/calcom?schema=public"
       EMAIL_SERVER_HOST: "mailhog"
       EMAIL_SERVER_PORT: "1025"
@@ -61,10 +67,9 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    ports:
-      - "3001:3001"
+    ports: ["3001:3001"]
+    # ensure Next listens on all interfaces
+    command: ["sh","-lc","yarn workspace @calcom/web start -p 3001 -H 0.0.0.0"]
 
 volumes:
   calcom_db_data:
-
-

@@ -48,12 +48,24 @@ RUN yarn config set nodeLinker node-modules && \
 # (already copied sources above)
 
 # Set minimal environment variables needed for build
+# --- Build-time config (overridden via docker build args) ---
+ARG NEXT_PUBLIC_WEBAPP_URL
+ARG NEXT_PUBLIC_WEBSITE_URL
+ARG NEXT_PUBLIC_EMBED_LIB_URL
+ARG NEXTAUTH_URL
+
+# Fallbacks (only used if args not provided)
+ENV NEXT_PUBLIC_WEBAPP_URL=${NEXT_PUBLIC_WEBAPP_URL:-https://evalify-cal.y34zyo.easypanel.host}
+ENV NEXT_PUBLIC_WEBSITE_URL=${NEXT_PUBLIC_WEBSITE_URL:-https://evalify-cal.y34zyo.easypanel.host}
+ENV NEXT_PUBLIC_EMBED_LIB_URL=${NEXT_PUBLIC_EMBED_LIB_URL:-https://evalify-cal.y34zyo.easypanel.host/embed/embed.js}
+ENV NEXTAUTH_URL=${NEXTAUTH_URL:-https://evalify-cal.y34zyo.easypanel.host}
+
+# Other build-time env that don't need real values
 ENV NEXTAUTH_SECRET="build-time-secret-will-be-overridden-at-runtime-32chars"
 ENV CALENDSO_ENCRYPTION_KEY="0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
-ENV NEXTAUTH_URL="http://localhost:3000/api/auth"
-ENV NEXT_PUBLIC_WEBAPP_URL="http://localhost:3000"
 ENV EMAIL_FROM="Cal.com <build@localhost>"
 ENV DATABASE_URL="postgresql://build:build@localhost:5432/build"
+    
 
 # Build the application (ignore TS/ESLint errors like test-only imports)
 ENV CI=1
