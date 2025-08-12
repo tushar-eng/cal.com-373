@@ -51,9 +51,9 @@ services:
     env_file:
       - ./.env.docker
     environment:
-      PORT: "3000"
-      NEXT_PUBLIC_WEBAPP_URL: "http://localhost:3000"
-      NEXTAUTH_URL: "http://localhost:3000/api/auth"
+      PORT: "3001"
+      NEXT_PUBLIC_WEBAPP_URL: "http://localhost:3001"
+      NEXTAUTH_URL: "http://localhost:3001/api/auth"
       DATABASE_URL: "postgresql://calcom:calcom@postgres:5432/calcom?schema=public"
       EMAIL_SERVER_HOST: "mailhog"
       EMAIL_SERVER_PORT: "1025"
