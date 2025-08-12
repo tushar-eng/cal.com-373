@@ -50,6 +50,7 @@ services:
       # >>> THESE ARGS ARE USED DURING yarn build <<<
       args:
         NEXT_PUBLIC_WEBAPP_URL: "https://evalify-cal.y34zyo.easypanel.host"
+        NEXT_PUBLIC_WEBSITE_URL: ""
         NEXT_PUBLIC_EMBED_LIB_URL: "https://evalify-cal.y34zyo.easypanel.host/embed/embed.js"
         NEXTAUTH_URL: "https://evalify-cal.y34zyo.easypanel.host"
     container_name: calcom_web
