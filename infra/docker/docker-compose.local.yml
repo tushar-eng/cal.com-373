@@ -52,8 +52,8 @@ services:
       - ./.env.docker
     environment:
       PORT: "3001"
-      NEXT_PUBLIC_WEBAPP_URL: "http://localhost:3001"
-      NEXTAUTH_URL: "http://localhost:3001/api/auth"
+      NEXT_PUBLIC_WEBAPP_URL: "https://evalify-cal.y34zyo.easypanel.host"
+      NEXTAUTH_URL: "https://evalify-cal.y34zyo.easypanel.host/api/auth"
       DATABASE_URL: "postgresql://calcom:calcom@postgres:5432/calcom?schema=public"
       EMAIL_SERVER_HOST: "mailhog"
       EMAIL_SERVER_PORT: "1025"
