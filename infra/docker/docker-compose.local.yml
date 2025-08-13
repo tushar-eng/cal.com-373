@@ -47,6 +47,10 @@ services:
     build:
       context: ../..
       dockerfile: infra/docker/web/Dockerfile.simple
+      args:
+        BUILD_NEXT_PUBLIC_WEBAPP_URL: https://cal.evalify.in
+        BUILD_NEXT_PUBLIC_WEBSITE_URL: https://meet.evalify.in
+        BUILD_NEXT_PUBLIC_EMBED_LIB_URL: https://cal.evalify.in/embed/embed.js
     container_name: calcom_web
     env_file:
       - ./.env.docker

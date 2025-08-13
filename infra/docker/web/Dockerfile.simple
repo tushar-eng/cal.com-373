@@ -48,12 +48,16 @@ RUN yarn config set nodeLinker node-modules && \
 # (already copied sources above)
 
 # Set minimal environment variables needed for build
-ENV NEXTAUTH_SECRET="build-time-secret-will-be-overridden-at-runtime-32chars"
-ENV CALENDSO_ENCRYPTION_KEY="0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
-ENV NEXTAUTH_URL="http://localhost:3000/api/auth"
-ENV NEXT_PUBLIC_WEBAPP_URL="http://localhost:3000"
-ENV EMAIL_FROM="Cal.com <build@localhost>"
-ENV DATABASE_URL="postgresql://build:build@localhost:5432/build"
+# ✅ ADD build args for public (compile-time) values
+ARG BUILD_NEXT_PUBLIC_WEBAPP_URL
+ARG BUILD_NEXT_PUBLIC_WEBSITE_URL
+ARG BUILD_NEXT_PUBLIC_EMBED_LIB_URL
+
+# Provide safe fallbacks (optional)
+ENV NEXT_PUBLIC_WEBAPP_URL="${BUILD_NEXT_PUBLIC_WEBAPP_URL:-http://localhost:3000}"
+ENV NEXT_PUBLIC_WEBSITE_URL="${BUILD_NEXT_PUBLIC_WEBSITE_URL:-http://localhost:3000}"
+ENV NEXT_PUBLIC_EMBED_LIB_URL="${BUILD_NEXT_PUBLIC_EMBED_LIB_URL:-http://localhost:3000/embed/embed.js}"
+
 
 # Build the application (ignore TS/ESLint errors like test-only imports)
 ENV CI=1
