@@ -52,8 +52,13 @@ services:
       - ./.env.docker
     environment:
       PORT: "3001"
-      NEXT_PUBLIC_WEBAPP_URL: "http://localhost:3001"
-      NEXTAUTH_URL: "http://localhost:3001/api/auth"
+      WEBAPP_URL: https://cal.evalify.in
+      CALENDSO_URL: https://cal.evalify.in
+      NEXT_PUBLIC_WEBAPP_URL: https://cal.evalify.in
+      NEXT_PUBLIC_WEBSITE_URL: https://cal.evalify.in
+      NEXT_PUBLIC_EMBED_LIB_URL: https://cal.evalify.in/embed/embed.js
+      NEXTAUTH_URL: https://cal.evalify.in
+      ALLOWED_HOSTNAMES: '["cal.evalify.in","meet.evalify.in","api.evalify.in","localhost:3000","cal.local:3000"]'
       DATABASE_URL: "postgresql://calcom:calcom@postgres:5432/calcom?schema=public"
       EMAIL_SERVER_HOST: "mailhog"
       EMAIL_SERVER_PORT: "1025"
