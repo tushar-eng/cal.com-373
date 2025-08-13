@@ -36,12 +36,12 @@ services:
       - ./.env.docker
     environment:
       # API listens on 80 in its image; map externally below
-      PORT: "3002"
+      PORT: "80"
     depends_on:
       postgres:
         condition: service_healthy
     ports:
-      - "3002:3002"
+      - "3002:80"
 
   web:
     build:
